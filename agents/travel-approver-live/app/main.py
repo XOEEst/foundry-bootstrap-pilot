@@ -1,14 +1,23 @@
 from __future__ import annotations
 
-import json
+import os
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Mapping
 
 PROTOCOL_NAME = "responses"
 PROTOCOL_VERSION = "2.0.0"
-DEFAULT_MODEL = "gpt-5.4-mini"
-MODEL_ENVIRONMENT_VARIABLE = "AZURE_AI_MODEL_DEPLOYMENT_NAME"
-AGENT_ID = "travel-approver-live"
+DEFAULT_LOCAL_MODEL = "gpt-5.4-mini"
+PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE = "FOUNDRY_PROJECT_ENDPOINT"
+PRIMARY_MODEL_ENVIRONMENT_VARIABLE = "AZURE_AI_MODEL_DEPLOYMENT_NAME"
+SECONDARY_MODEL_ENVIRONMENT_VARIABLE = "FOUNDRY_MODEL_NAME"
+OPTIONAL_AGENT_NAME_ENVIRONMENT_VARIABLE = "AGENT_NAME"
+OPTIONAL_AGENT_INSTRUCTIONS_ENVIRONMENT_VARIABLE = "AGENT_INSTRUCTIONS"
+DEFAULT_AGENT_NAME = "travel-approver-live"
+DEFAULT_REMOTE_INSTRUCTIONS = (
+    "You are a travel approval assistant. Review requests against policy, "
+    "budget, and booking lead times. Respond concisely with a decision and "
+    "the policy rationale."
+)
 ROLE_SUMMARY = "Reviews travel approvals and returns a deterministic local Responses envelope."
 
 
@@ -36,11 +45,19 @@ class ResponseEnvelope:
 
 
 @dataclass
+class HostedAgentSettings:
+    project_endpoint: str
+    model: str
+    agent_name: str
+    instructions: str
+
+
+@dataclass
 class LocalPilotResponsesHost:
     agent_id: str
     role_summary: str
     default_reply: str
-    model: str = DEFAULT_MODEL
+    model: str = DEFAULT_LOCAL_MODEL
 
     def start(self) -> dict[str, str]:
         return {
@@ -90,7 +107,7 @@ def _extract_input(payload: dict[str, Any] | None) -> str:
 
 def build_local_app() -> LocalPilotResponsesHost:
     return LocalPilotResponsesHost(
-        agent_id=AGENT_ID,
+        agent_id=DEFAULT_AGENT_NAME,
         role_summary=ROLE_SUMMARY,
         default_reply="Travel approval pilot ready.",
     )
@@ -101,8 +118,68 @@ def invoke(payload: dict[str, Any] | None = None) -> dict[str, Any]:
     return response.to_dict()
 
 
+def resolve_remote_settings(environment: Mapping[str, str] | None = None) -> HostedAgentSettings:
+    env = os.environ if environment is None else environment
+    project_endpoint = (env.get(PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE) or "").strip()
+    if not project_endpoint:
+        raise RuntimeError(
+            "Foundry project endpoint is not configured. "
+            f"Set {PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE}."
+        )
+
+    model = (
+        (env.get(PRIMARY_MODEL_ENVIRONMENT_VARIABLE) or "").strip()
+        or (env.get(SECONDARY_MODEL_ENVIRONMENT_VARIABLE) or "").strip()
+    )
+    if not model:
+        raise RuntimeError(
+            "Model deployment name is not configured. Set "
+            f"{PRIMARY_MODEL_ENVIRONMENT_VARIABLE} or "
+            f"{SECONDARY_MODEL_ENVIRONMENT_VARIABLE}."
+        )
+
+    agent_name = (
+        (env.get(OPTIONAL_AGENT_NAME_ENVIRONMENT_VARIABLE) or "").strip()
+        or DEFAULT_AGENT_NAME
+    )
+    instructions = (
+        (env.get(OPTIONAL_AGENT_INSTRUCTIONS_ENVIRONMENT_VARIABLE) or "").strip()
+        or DEFAULT_REMOTE_INSTRUCTIONS
+    )
+    return HostedAgentSettings(
+        project_endpoint=project_endpoint,
+        model=model,
+        agent_name=agent_name,
+        instructions=instructions,
+    )
+
+
+def create_remote_server() -> Any:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    from agent_framework import Agent
+    from agent_framework.foundry import FoundryChatClient
+    from agent_framework_foundry_hosting import ResponsesHostServer
+    from azure.identity import DefaultAzureCredential
+
+    settings = resolve_remote_settings()
+    client = FoundryChatClient(
+        project_endpoint=settings.project_endpoint,
+        model=settings.model,
+        credential=DefaultAzureCredential(),
+    )
+    agent = Agent(
+        client=client,
+        instructions=settings.instructions,
+        default_options={"store": False},
+    )
+    return ResponsesHostServer(agent)
+
+
 def main() -> int:
-    print(json.dumps(invoke({"input": "pilot smoke test"}), indent=2))
+    create_remote_server().run()
     return 0
 
 

@@ -3,4 +3,8 @@ name = "travel-approver-live"
 version = "0.1.0"
 description = "Deterministic local bootstrap pilot root for a bound-aligned travel approvals agent."
 requires-python = ">=3.12,<3.14"
-dependencies = []
+dependencies = [
+  "agent-framework-foundry==1.10.0",
+  "agent-framework-foundry-hosting>=1.0.0a260630",
+  "python-dotenv>=1.0.0",
+]

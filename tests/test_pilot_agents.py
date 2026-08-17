@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import re
 import sys
+import tomllib
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -73,3 +76,55 @@ class PilotAgentTests(unittest.TestCase):
             with self.subTest(agent=agent["agent_id"]):
                 metadata_path = REPO_ROOT / agent["root"] / ".foundry" / "agent-metadata.yaml"
                 self.assertEqual(metadata_path.exists(), agent["expects_metadata"])
+
+    def test_travel_approver_live_remote_settings_follow_sdk_pattern(self) -> None:
+        module = load_module("agents/travel-approver-live/app/main.py")
+
+        with patch.dict(
+            os.environ,
+            {
+                "FOUNDRY_PROJECT_ENDPOINT": "https://example.services.ai.azure.com/api/projects/travel-approver-live",
+                "FOUNDRY_MODEL_NAME": "gpt-4.1-mini",
+            },
+            clear=True,
+        ):
+            settings = module.resolve_remote_settings()
+            self.assertEqual(settings.project_endpoint, "https://example.services.ai.azure.com/api/projects/travel-approver-live")
+            self.assertEqual(settings.model, "gpt-4.1-mini")
+            self.assertEqual(settings.agent_name, "travel-approver-live")
+            self.assertEqual(settings.instructions, module.DEFAULT_REMOTE_INSTRUCTIONS)
+
+        with patch.dict(
+            os.environ,
+            {
+                "FOUNDRY_PROJECT_ENDPOINT": "https://example.services.ai.azure.com/api/projects/travel-approver-live",
+                "AZURE_AI_MODEL_DEPLOYMENT_NAME": "gpt-5.4-mini",
+                "FOUNDRY_MODEL_NAME": "fallback-model",
+                "AGENT_NAME": "travel-approver-live-managed",
+                "AGENT_INSTRUCTIONS": "Approve only compliant travel.",
+            },
+            clear=True,
+        ):
+            settings = module.resolve_remote_settings()
+            self.assertEqual(settings.model, "gpt-5.4-mini")
+            self.assertEqual(settings.agent_name, "travel-approver-live-managed")
+            self.assertEqual(settings.instructions, "Approve only compliant travel.")
+
+    def test_travel_approver_live_dependency_and_metadata_contract(self) -> None:
+        pyproject = tomllib.loads((REPO_ROOT / "agents/travel-approver-live/pyproject.toml").read_text(encoding="utf-8"))
+        dependencies = pyproject["project"]["dependencies"]
+        self.assertIn("agent-framework-foundry==1.10.0", dependencies)
+        self.assertIn("agent-framework-foundry-hosting>=1.0.0a260630", dependencies)
+        self.assertIn("python-dotenv>=1.0.0", dependencies)
+
+        requirements = (REPO_ROOT / "agents/travel-approver-live/requirements.txt").read_text(encoding="utf-8")
+        self.assertIn("agent-framework-foundry==1.10.0", requirements)
+        self.assertIn("agent-framework-foundry-hosting>=1.0.0a260630", requirements)
+        self.assertIn("python-dotenv>=1.0.0", requirements)
+
+        metadata = (REPO_ROOT / "agents/travel-approver-live/.foundry/agent-metadata.yaml").read_text(encoding="utf-8")
+        self.assertIn("project_endpoint_environment_variable: FOUNDRY_PROJECT_ENDPOINT", metadata)
+        self.assertIn("primary_model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME", metadata)
+        self.assertIn("secondary_model_environment_variable: FOUNDRY_MODEL_NAME", metadata)
+        self.assertIn("- AGENT_NAME", metadata)
+        self.assertIn("- AGENT_INSTRUCTIONS", metadata)

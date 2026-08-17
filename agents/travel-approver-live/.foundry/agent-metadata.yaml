@@ -8,6 +8,13 @@ agent_name: travel-approver-live
 expected_version: "2026-08-17.1"
 authentication_method: oidc
 static_credentials_allowed: false
+runtime_environment:
+  project_endpoint_environment_variable: FOUNDRY_PROJECT_ENDPOINT
+  primary_model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME
+  secondary_model_environment_variable: FOUNDRY_MODEL_NAME
+  optional_environment_variables:
+    - AGENT_NAME
+    - AGENT_INSTRUCTIONS
 hosted_runtime:
   kind: hosted
   runtime: python_3_13
@@ -20,3 +27,5 @@ hosted_runtime:
   cpu: "0.5"
   memory: 1Gi
   model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME
+  alternate_model_environment_variables:
+    - FOUNDRY_MODEL_NAME
