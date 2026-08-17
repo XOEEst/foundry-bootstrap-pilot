@@ -3,9 +3,10 @@ repository_identity: example-customer/foundry-bootstrap-pilot
 default_branch: main
 source_root: agents/travel-approver-live/app
 package_root: agents/travel-approver-live/app
-project_endpoint: https://example.services.ai.azure.com/api/projects/travel-approver-live
-agent_name: travel-approver-live
-expected_version: "2026-08-17.1"
+project_endpoint: https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp
+foundry_account_resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.CognitiveServices/accounts/luechen-eus2-foundry
+agent_name: foundry-opt-bootstrap-pilot-aligned
+expected_version: "1"
 authentication_method: oidc
 static_credentials_allowed: false
 runtime_environment:
@@ -29,3 +30,12 @@ hosted_runtime:
   model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME
   alternate_model_environment_variables:
     - FOUNDRY_MODEL_NAME
+model_deployments:
+  - alias: baseline-model
+    deployment_name: gpt-4.1
+    model_format: OpenAI
+    model_name: gpt-4.1
+    model_version: "1"
+    required_capabilities:
+      - name: responses
+        enabled: true

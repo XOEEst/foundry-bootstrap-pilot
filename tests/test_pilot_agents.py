@@ -83,22 +83,22 @@ class PilotAgentTests(unittest.TestCase):
         with patch.dict(
             os.environ,
             {
-                "FOUNDRY_PROJECT_ENDPOINT": "https://example.services.ai.azure.com/api/projects/travel-approver-live",
-                "FOUNDRY_MODEL_NAME": "gpt-4.1-mini",
+                "FOUNDRY_PROJECT_ENDPOINT": "https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp",
+                "FOUNDRY_MODEL_NAME": "gpt-4.1",
             },
             clear=True,
         ):
             settings = module.resolve_remote_settings()
-            self.assertEqual(settings.project_endpoint, "https://example.services.ai.azure.com/api/projects/travel-approver-live")
-            self.assertEqual(settings.model, "gpt-4.1-mini")
+            self.assertEqual(settings.project_endpoint, "https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp")
+            self.assertEqual(settings.model, "gpt-4.1")
             self.assertEqual(settings.agent_name, "travel-approver-live")
             self.assertEqual(settings.instructions, module.DEFAULT_REMOTE_INSTRUCTIONS)
 
         with patch.dict(
             os.environ,
             {
-                "FOUNDRY_PROJECT_ENDPOINT": "https://example.services.ai.azure.com/api/projects/travel-approver-live",
-                "AZURE_AI_MODEL_DEPLOYMENT_NAME": "gpt-5.4-mini",
+                "FOUNDRY_PROJECT_ENDPOINT": "https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp",
+                "AZURE_AI_MODEL_DEPLOYMENT_NAME": "gpt-4.1",
                 "FOUNDRY_MODEL_NAME": "fallback-model",
                 "AGENT_NAME": "travel-approver-live-managed",
                 "AGENT_INSTRUCTIONS": "Approve only compliant travel.",
@@ -106,7 +106,7 @@ class PilotAgentTests(unittest.TestCase):
             clear=True,
         ):
             settings = module.resolve_remote_settings()
-            self.assertEqual(settings.model, "gpt-5.4-mini")
+            self.assertEqual(settings.model, "gpt-4.1")
             self.assertEqual(settings.agent_name, "travel-approver-live-managed")
             self.assertEqual(settings.instructions, "Approve only compliant travel.")
 
@@ -123,8 +123,15 @@ class PilotAgentTests(unittest.TestCase):
         self.assertIn("python-dotenv>=1.0.0", requirements)
 
         metadata = (REPO_ROOT / "agents/travel-approver-live/.foundry/agent-metadata.yaml").read_text(encoding="utf-8")
+        self.assertIn("project_endpoint: https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp", metadata)
+        self.assertIn("foundry_account_resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.CognitiveServices/accounts/luechen-eus2-foundry", metadata)
+        self.assertIn("agent_name: foundry-opt-bootstrap-pilot-aligned", metadata)
+        self.assertIn('expected_version: "1"', metadata)
         self.assertIn("project_endpoint_environment_variable: FOUNDRY_PROJECT_ENDPOINT", metadata)
         self.assertIn("primary_model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME", metadata)
         self.assertIn("secondary_model_environment_variable: FOUNDRY_MODEL_NAME", metadata)
         self.assertIn("- AGENT_NAME", metadata)
         self.assertIn("- AGENT_INSTRUCTIONS", metadata)
+        self.assertIn("deployment_name: gpt-4.1", metadata)
+        self.assertIn("model_name: gpt-4.1", metadata)
+        self.assertIn('model_version: "1"', metadata)
