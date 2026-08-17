@@ -1,0 +1,6 @@
+[project]
+name = "policy-ready-unbound"
+version = "0.1.0"
+description = "Deterministic local bootstrap pilot root for a ready-unbound policy helper."
+requires-python = ">=3.12,<3.14"
+dependencies = []

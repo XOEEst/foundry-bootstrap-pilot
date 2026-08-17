@@ -1,0 +1,35 @@
+name: foundry-bootstrap-pilot
+services:
+  travel-approver-live:
+    host: azure.ai.agent
+    project: agents/travel-approver-live
+    language: python
+    codeConfiguration:
+      runtime: python_3_13
+      entryPoint: app/main.py
+    kind: hosted
+    protocols:
+      - protocol: responses
+        version: 2.0.0
+  claims-review-fixture:
+    host: azure.ai.agent
+    project: agents/claims-review-fixture
+    language: python
+    codeConfiguration:
+      runtime: python_3_13
+      entryPoint: app/main.py
+    kind: hosted
+    protocols:
+      - protocol: responses
+        version: 2.0.0
+  policy-ready-unbound:
+    host: azure.ai.agent
+    project: services/policy-ready-unbound
+    language: python
+    codeConfiguration:
+      runtime: python_3_13
+      entryPoint: main.py
+    kind: hosted
+    protocols:
+      - protocol: responses
+        version: 2.0.0

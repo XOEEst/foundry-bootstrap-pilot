@@ -1,0 +1,22 @@
+schema_version: 1
+repository_identity: example-customer/foundry-bootstrap-pilot
+default_branch: main
+source_root: agents/claims-review-fixture/app
+package_root: agents/claims-review-fixture/app
+project_endpoint: https://example.services.ai.azure.com/api/projects/claims-review-fixture
+agent_name: claims-review-fixture
+expected_version: "2026-04-01.3"
+authentication_method: oidc
+static_credentials_allowed: false
+hosted_runtime:
+  kind: hosted
+  runtime: python_3_13
+  entry_point:
+    - python
+    - app/main.py
+  dependency_resolution: remote_build
+  protocol_name: responses
+  protocol_version: "2.0.0"
+  cpu: "0.5"
+  memory: 1Gi
+  model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME

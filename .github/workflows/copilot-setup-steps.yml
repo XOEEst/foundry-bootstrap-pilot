@@ -1,0 +1,48 @@
+name: Customer Copilot Setup
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+      - azure.yaml
+      - agents/**
+      - services/**
+
+permissions:
+  contents: read
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: customer-preflight
+        name: Customer preflight marker
+        shell: bash
+        run: |
+          echo "customer-owned preflight"
+
+      - id: foundry-opt-checkout
+        name: Reserved bootstrap checkout slot
+        shell: bash
+        run: |
+          echo "future bootstrap will replace this managed step"
+
+      - id: foundry-opt-bootstrap
+        name: Reserved bootstrap tool slot
+        shell: bash
+        run: |
+          echo "future bootstrap will replace this managed step"
+
+      - id: customer-postflight
+        name: Customer postflight marker
+        shell: bash
+        run: |
+          test -f README.md
+          test -f azure.yaml

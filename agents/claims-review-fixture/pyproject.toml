@@ -1,0 +1,6 @@
+[project]
+name = "claims-review-fixture"
+version = "0.1.0"
+description = "Deterministic local bootstrap pilot root for a bound-diverged or bound-unknown fixture."
+requires-python = ">=3.12,<3.14"
+dependencies = []

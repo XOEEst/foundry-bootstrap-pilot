@@ -1,0 +1,21 @@
+name: Customer Docs Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+      - .github/copilot-instructions.md
+
+jobs:
+  verify-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify customer docs exist
+        shell: bash
+        run: |
+          test -f README.md
+          test -f .github/copilot-instructions.md
