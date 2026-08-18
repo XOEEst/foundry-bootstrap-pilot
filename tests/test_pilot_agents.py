@@ -123,6 +123,8 @@ class PilotAgentTests(unittest.TestCase):
         self.assertIn("python-dotenv>=1.0.0", requirements)
 
         metadata = (REPO_ROOT / "agents/travel-approver-live/.foundry/agent-metadata.yaml").read_text(encoding="utf-8")
+        self.assertIn("source_root: agents/travel-approver-live/app", metadata)
+        self.assertIn("package_root: agents/travel-approver-live", metadata)
         self.assertIn("project_endpoint: https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp", metadata)
         self.assertIn("foundry_account_resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.CognitiveServices/accounts/luechen-eus2-foundry", metadata)
         self.assertIn("agent_name: foundry-opt-bootstrap-pilot-aligned", metadata)
