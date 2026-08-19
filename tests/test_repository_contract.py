@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-RUNTIME_SHA = "ec2287506c6e6e3537f71127ead4051182b70a98"
+RUNTIME_SHA = "6f6e5249356b4680184cd4b3376b60c33b2fa4fb"
 ACTIVATION_RUNTIME_SHA = "5f03a9188eb720489404980458d94fb3c353469c"
 
 
