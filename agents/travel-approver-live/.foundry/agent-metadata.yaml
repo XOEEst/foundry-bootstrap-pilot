@@ -6,7 +6,7 @@ package_root: agents/travel-approver-live
 project_endpoint: https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp
 foundry_account_resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.CognitiveServices/accounts/luechen-eus2-foundry
 agent_name: foundry-opt-bootstrap-pilot-aligned
-expected_version: "1"
+expected_version: "3"
 authentication_method: oidc
 static_credentials_allowed: false
 runtime_environment:

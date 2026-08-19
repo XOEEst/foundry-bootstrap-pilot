@@ -128,7 +128,7 @@ class PilotAgentTests(unittest.TestCase):
         self.assertIn("project_endpoint: https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp", metadata)
         self.assertIn("foundry_account_resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.CognitiveServices/accounts/luechen-eus2-foundry", metadata)
         self.assertIn("agent_name: foundry-opt-bootstrap-pilot-aligned", metadata)
-        self.assertIn('expected_version: "1"', metadata)
+        self.assertIn('expected_version: "3"', metadata)
         self.assertIn("project_endpoint_environment_variable: FOUNDRY_PROJECT_ENDPOINT", metadata)
         self.assertIn("primary_model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME", metadata)
         self.assertIn("secondary_model_environment_variable: FOUNDRY_MODEL_NAME", metadata)
