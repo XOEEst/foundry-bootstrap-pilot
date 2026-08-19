@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-RUNTIME_SHA = "b36321a2893d4e9717b85ea12b8f5206c91845b8"
+RUNTIME_SHA = "ec2287506c6e6e3537f71127ead4051182b70a98"
 ACTIVATION_RUNTIME_SHA = "5f03a9188eb720489404980458d94fb3c353469c"
 
 
@@ -56,6 +56,10 @@ class RepositoryContractTests(unittest.TestCase):
                 )
 
         registry = (REPO_ROOT / ".foundry-opt/registry.yaml").read_text(encoding="utf-8")
+        self.assertIn(
+            "oidc_subject_prefix: repo:XOEEst@18523445/foundry-bootstrap-pilot@1337678711",
+            registry,
+        )
         self.assertRegex(
             registry,
             r"agent_id: travel-approver-live[\s\S]*?enabled: true",
