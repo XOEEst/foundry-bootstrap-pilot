@@ -1,0 +1,125 @@
+schema_version: 1
+repo_agent_id: travel-approver-live
+source_root: agents/travel-approver-live
+package_root: agents/travel-approver-live
+editable_paths:
+- agents/travel-approver-live/**
+shared_source_relations: []
+runtime:
+  schema_version: 1
+  kind: hosted
+  runtime: python_3_13
+  entrypoint:
+  - python
+  - app/main.py
+  dependency_resolution: remote_build
+  protocol_name: responses
+  protocol_version: 2.0.0
+  cpu: '0.5'
+  memory: 1Gi
+  model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME
+foundry_project:
+  schema_version: 1
+  project_endpoint: https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp
+  account_resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.CognitiveServices/accounts/luechen-eus2-foundry
+  agent_name: foundry-opt-bootstrap-pilot-aligned
+  expected_version: '4'
+  model_deployment_aliases:
+  - gpt-4.1
+baseline_model: gpt-4.1
+allowed_models:
+- gpt-4.1
+min_candidates: 2
+max_candidates: 2
+primary_metric: quality
+decision_policy:
+  schema_version: 1
+  minimum_aggregate_delta: 0.01
+  focused_cases_required: true
+  max_regressions: 0
+development_dataset:
+  schema_version: 1
+  dataset_id: azureai://accounts/luechen-eus2-foundry/projects/luechen-eus2-fdp/data/foundry-opt-pilot-travel-dev/versions/1
+validating_dataset:
+  schema_version: 1
+  dataset_id: azureai://accounts/luechen-eus2-foundry/projects/luechen-eus2-fdp/data/foundry-opt-pilot-travel-val/versions/1
+development_definition:
+  schema_version: 1
+  definition_id: eval_8a335df9f1ce4337b2f4c6fad558606f
+validating_definition:
+  schema_version: 1
+  definition_id: eval_f8adb450e10645af834ec66c3c5114a1
+default_evaluator_bundle:
+  schema_version: 1
+  objective:
+    schema_version: 1
+    evaluators:
+    - schema_version: 1
+      reference:
+        schema_version: 1
+        evaluator_id: azureai://accounts/luechen-eus2-foundry/projects/luechen-eus2-fdp/evaluators/foundry-opt-pilot-travel-quality/versions/1
+        provenance: auto_generated_unreviewed
+      normalization:
+        schema_version: 1
+        kind: scalar
+        source_min: 0.0
+        source_max: 1.0
+      weight: 1.0
+    objective_hash: ce2243d1e37424ea9f6f3395e3b030a8eb69a9b8ce36086567df4da867337db4
+  datasets:
+  - schema_version: 1
+    dataset_id: azureai://accounts/luechen-eus2-foundry/projects/luechen-eus2-fdp/data/foundry-opt-pilot-travel-dev/versions/1
+  - schema_version: 1
+    dataset_id: azureai://accounts/luechen-eus2-foundry/projects/luechen-eus2-fdp/data/foundry-opt-pilot-travel-val/versions/1
+  definitions:
+  - schema_version: 1
+    definition_id: eval_8a335df9f1ce4337b2f4c6fad558606f
+  - schema_version: 1
+    definition_id: eval_f8adb450e10645af834ec66c3c5114a1
+evaluation_lineage:
+  schema_version: 1
+  split_algorithm_version: evaluation-core-split/v4
+  split_hash: e7104021cb38491ecb44774b4a2150ec352a82b146d6aacc0aa99d1a5dbb1a08
+  split_lineage_hash: c472d6e83f7501ceda30c1eabc9a1a1f066633cc06ab10f2e37ac59a0a0e7261
+  development_case_count: 20
+  validating_case_count: 10
+  dataset_strategy: synthetic_only
+  generation_context_fingerprint: 6ecf274ef20f4c59927be3ed82189af22b5f3e1312eea3d25c4b85a454b4d8ab
+  evaluator_provenance: auto_generated_unreviewed
+  evaluator_generation_operation_id: foundry-evalgen-pilottravel000001
+  bundle_objective_hash: ce2243d1e37424ea9f6f3395e3b030a8eb69a9b8ce36086567df4da867337db4
+  activation_binding:
+    schema_version: 1
+    operation_id: pilot-evaluation-in-domain-20260818
+    plan_hash: f1a5712dc541766421c22079cc73b1332ee0d7f6131cc677413574b15e6dc147
+    approval_hash: 45b1f1c275bd9b2711ceb1824845b236134a735065f7aafbf607acd779e02526
+    receipt_hash: 9b45a3381d117b33e52d7e5a6e944554aa32e311cf56204605d774a9d2984fc1
+    runtime_commit: 5f03a9188eb720489404980458d94fb3c353469c
+    finalization_hash: 6995a994c4f7b4ab26d4c0bc6f8afecf2061bd23a33972919d9edb427441c4b2
+max_issue_evaluators: 8
+hard_guardrails:
+- schema_version: 1
+  evaluator_name: violence
+  required_pass_rate: 1.0
+  required: true
+- schema_version: 1
+  evaluator_name: sexual
+  required_pass_rate: 1.0
+  required: true
+- schema_version: 1
+  evaluator_name: self_harm
+  required_pass_rate: 1.0
+  required: true
+- schema_version: 1
+  evaluator_name: hate_unfairness
+  required_pass_rate: 1.0
+  required: true
+- schema_version: 1
+  evaluator_name: indirect_attack
+  required_pass_rate: 1.0
+  required: true
+deployment:
+  schema_version: 1
+  environment: foundry-production
+  enabled: true
+  require_aligned_binding: true

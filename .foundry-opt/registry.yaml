@@ -1,0 +1,32 @@
+schema_version: 1
+distribution:
+  schema_version: 1
+  repository: https://github.com/XOEEst/foundry-optimizer-coding-agent-plugin.git
+  channel: pinned
+  pin: b36321a2893d4e9717b85ea12b8f5206c91845b8
+github:
+  schema_version: 1
+  optimizer_environment: copilot
+  deployment_environment: foundry-production
+  client_id_variable: AZURE_OPTIMIZER_CLIENT_ID
+identity:
+  schema_version: 1
+  kind: user_assigned_managed_identity
+  resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.ManagedIdentity/userAssignedIdentities/foundry-opt-bootstrap-pilot
+  client_id: 93351d0c-f59e-426b-a401-bad7df11b6e5
+agents:
+- schema_version: 1
+  agent_id: claims-review-fixture
+  root: agents/claims-review-fixture
+  config_path: agents/claims-review-fixture/.foundry/foundry-opt.yaml
+  enabled: false
+- schema_version: 1
+  agent_id: policy-ready-unbound
+  root: services/policy-ready-unbound
+  config_path: services/policy-ready-unbound/.foundry/foundry-opt.yaml
+  enabled: false
+- schema_version: 1
+  agent_id: travel-approver-live
+  root: agents/travel-approver-live
+  config_path: agents/travel-approver-live/.foundry/foundry-opt.yaml
+  enabled: true

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+RUNTIME_SHA = "b36321a2893d4e9717b85ea12b8f5206c91845b8"
+ACTIVATION_RUNTIME_SHA = "5f03a9188eb720489404980458d94fb3c353469c"
 
 
 class RepositoryContractTests(unittest.TestCase):
@@ -20,15 +24,50 @@ class RepositoryContractTests(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self.assertTrue((REPO_ROOT / relative_path).exists())
 
-    def test_bootstrap_managed_files_are_not_precreated(self) -> None:
-        forbidden = (
-            ".foundry-opt/registry.yaml",
-            ".foundry-opt/bootstrap.lock.json",
-            ".github/foundry-opt.lock.yml",
-        )
-        for relative_path in forbidden:
+    def test_bootstrap_managed_files_match_the_committed_lock(self) -> None:
+        lock_path = REPO_ROOT / ".foundry-opt/bootstrap.lock.json"
+        self.assertTrue(lock_path.exists())
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        self.assertEqual(lock["runtime_commit"], RUNTIME_SHA)
+        self.assertEqual(lock["last_activation"]["outcome"], "succeeded")
+
+        for entry in lock["managed_files"]:
+            relative_path = entry["path"]
             with self.subTest(path=relative_path):
-                self.assertFalse((REPO_ROOT / relative_path).exists())
+                managed_path = REPO_ROOT / relative_path
+                self.assertTrue(managed_path.exists())
+                digest = hashlib.sha256(managed_path.read_bytes()).hexdigest()
+                self.assertEqual(digest, entry["applied_sha256"])
+
+        self.assertFalse((REPO_ROOT / ".github/foundry-opt.lock.yml").exists())
+
+    def test_stable_runtime_pin_preserves_the_live_activation(self) -> None:
+        pin_locations = (
+            ".foundry-opt/registry.yaml",
+            ".github/workflows/copilot-setup-steps.yml",
+            ".github/workflows/foundry-opt-validation.yml",
+            ".github/workflows/foundry-opt-deploy.yml",
+        )
+        for relative_path in pin_locations:
+            with self.subTest(path=relative_path):
+                self.assertIn(
+                    RUNTIME_SHA,
+                    (REPO_ROOT / relative_path).read_text(encoding="utf-8"),
+                )
+
+        registry = (REPO_ROOT / ".foundry-opt/registry.yaml").read_text(encoding="utf-8")
+        self.assertRegex(
+            registry,
+            r"agent_id: travel-approver-live[\s\S]*?enabled: true",
+        )
+        sidecar = (
+            REPO_ROOT / "agents/travel-approver-live/.foundry/foundry-opt.yaml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "operation_id: pilot-evaluation-in-domain-20260818",
+            sidecar,
+        )
+        self.assertIn(f"runtime_commit: {ACTIVATION_RUNTIME_SHA}", sidecar)
 
     def test_setup_workflow_keeps_customer_steps_around_reserved_slots(self) -> None:
         workflow = (REPO_ROOT / ".github/workflows/copilot-setup-steps.yml").read_text(encoding="utf-8")

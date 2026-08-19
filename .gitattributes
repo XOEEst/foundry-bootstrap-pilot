@@ -1,0 +1,6 @@
+.foundry-opt/** text eol=lf
+.github/ISSUE_TEMPLATE/** text eol=lf
+.github/agents/** text eol=lf
+.github/instructions/** text eol=lf
+.github/workflows/** text eol=lf
+agents/**/.foundry/** text eol=lf

@@ -1,0 +1,82 @@
+name: Optimize the Foundry agent
+description: Run one bounded, evidence-backed optimize job.
+title: "[Optimize job] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Assign the completed issue to Copilot to start the optimize job.
+        Provide either a stable repoAgentId from `.foundry-opt/registry.yaml` or an
+        explicit Foundry target when the repository has not applied the managed
+        contract yet. Parser support is built into the runtime now, so these headings and IDs are part of the managed contract. Template pin remains on the pre-repin shared runtime until the final post-merge repin lands. Blank optional sections keep repository defaults; unclear
+        targets or invalid evaluator weights fail preflight before any job starts.
+
+  - type: input
+    id: repo_agent_id
+    attributes:
+      label: Repository agent ID or explicit Foundry target
+      description: Enter one stable repoAgentId from `.foundry-opt/registry.yaml`, or an explicit Foundry target identifier for migration cases.
+      placeholder: example-agent
+    validations:
+      required: true
+
+  - type: textarea
+    id: optimization_goal
+    attributes:
+      label: Optimization goal
+      description: Describe the behavior or quality outcome that should improve.
+      placeholder: Improve complete and correct policy coverage for multi-rule requests.
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed_failures
+    attributes:
+      label: Observed failures or evidence
+      description: Summarize failing cases, evaluation patterns, traces, or user feedback without sensitive data.
+      placeholder: Responses sometimes omit one applicable rule when several rules apply.
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and guardrails
+      description: Add business constraints beyond the repository policy, or state that the repository defaults apply.
+      placeholder: Preserve advisory-only behavior and do not increase sensitive-data requests.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: candidate_budget
+    attributes:
+      label: Changed candidates
+      description: Select the number of changed candidates beyond the fresh baseline.
+      options:
+        - "2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: editable_scope
+    attributes:
+      label: Optional narrower editable scope
+      description: One repository-relative policy-approved path pattern per line. Leave blank to use the policy default.
+      render: text
+
+  - type: textarea
+    id: candidate_models
+    attributes:
+      label: Optional narrower model set
+      description: One policy-approved deployment name per line. Leave blank to use the policy default.
+      render: text
+
+  - type: textarea
+    id: issue_evaluators
+    attributes:
+      label: Optional exact evaluator IDs
+      description: One exact evaluator ID per line. Append `weight=<positive>` to override equal weighting. Blank uses the repository default evaluator bundle. Invalid or unclear entries fail preflight.
+      placeholder: |
+        azureai://accounts/example/projects/example/evaluators/quality/versions/1
+        azureai://built-in/evaluators/safety weight=2
+      render: text

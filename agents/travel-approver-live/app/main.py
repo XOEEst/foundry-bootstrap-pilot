@@ -8,6 +8,7 @@ PROTOCOL_NAME = "responses"
 PROTOCOL_VERSION = "2.0.0"
 DEFAULT_LOCAL_MODEL = "gpt-5.4-mini"
 PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE = "FOUNDRY_PROJECT_ENDPOINT"
+STANDARD_PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE = "AZURE_AI_PROJECT_ENDPOINT"
 PRIMARY_MODEL_ENVIRONMENT_VARIABLE = "AZURE_AI_MODEL_DEPLOYMENT_NAME"
 SECONDARY_MODEL_ENVIRONMENT_VARIABLE = "FOUNDRY_MODEL_NAME"
 OPTIONAL_AGENT_NAME_ENVIRONMENT_VARIABLE = "AGENT_NAME"
@@ -128,11 +129,17 @@ def invoke(payload: dict[str, Any] | None = None) -> dict[str, Any]:
 
 def resolve_remote_settings(environment: Mapping[str, str] | None = None) -> HostedAgentSettings:
     env = os.environ if environment is None else environment
-    project_endpoint = (env.get(PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE) or "").strip()
+    project_endpoint = (
+        (env.get(PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE) or "").strip()
+        or (
+            env.get(STANDARD_PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE) or ""
+        ).strip()
+    )
     if not project_endpoint:
         raise RuntimeError(
             "Foundry project endpoint is not configured. "
-            f"Set {PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE}."
+            f"Set {PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE} or "
+            f"{STANDARD_PROJECT_ENDPOINT_ENVIRONMENT_VARIABLE}."
         )
 
     model = (
