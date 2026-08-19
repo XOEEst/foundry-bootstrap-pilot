@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           repository="https://github.com/XOEEst/foundry-optimizer-coding-agent-plugin.git"
-          commit="b36321a2893d4e9717b85ea12b8f5206c91845b8"
+          commit="ec2287506c6e6e3537f71127ead4051182b70a98"
           shared_root="$RUNNER_TEMP/foundry-opt-shared"
           rm -rf "$shared_root"
           git init "$shared_root"
@@ -52,6 +52,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if ! command -v uv >/dev/null 2>&1; then
+            python3 -m pip install --disable-pip-version-check --no-input "uv==0.11.6"
+          fi
           uv sync --frozen --project "$FOUNDRY_OPT_PACKAGE_ROOT"
           launcher_root="$HOME/.local/bin"
           mkdir -p "$launcher_root"
