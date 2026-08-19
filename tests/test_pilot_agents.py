@@ -110,6 +110,20 @@ class PilotAgentTests(unittest.TestCase):
             self.assertEqual(settings.agent_name, "travel-approver-live-managed")
             self.assertEqual(settings.instructions, "Approve only compliant travel.")
 
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_AI_PROJECT_ENDPOINT": "https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp",
+                "AZURE_AI_MODEL_DEPLOYMENT_NAME": "gpt-4.1",
+            },
+            clear=True,
+        ):
+            settings = module.resolve_remote_settings()
+            self.assertEqual(
+                settings.project_endpoint,
+                "https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp",
+            )
+
     def test_travel_approver_live_dependency_and_metadata_contract(self) -> None:
         pyproject = tomllib.loads((REPO_ROOT / "agents/travel-approver-live/pyproject.toml").read_text(encoding="utf-8"))
         dependencies = pyproject["project"]["dependencies"]
@@ -128,7 +142,7 @@ class PilotAgentTests(unittest.TestCase):
         self.assertIn("project_endpoint: https://luechen-eus2-foundry.services.ai.azure.com/api/projects/luechen-eus2-fdp", metadata)
         self.assertIn("foundry_account_resource_id: /subscriptions/7b43cfa1-da92-48cc-865d-5499466b3b5c/resourceGroups/luechen-eastus2/providers/Microsoft.CognitiveServices/accounts/luechen-eus2-foundry", metadata)
         self.assertIn("agent_name: foundry-opt-bootstrap-pilot-aligned", metadata)
-        self.assertIn('expected_version: "4"', metadata)
+        self.assertNotIn("expected_version:", metadata)
         self.assertIn("project_endpoint_environment_variable: FOUNDRY_PROJECT_ENDPOINT", metadata)
         self.assertIn("primary_model_environment_variable: AZURE_AI_MODEL_DEPLOYMENT_NAME", metadata)
         self.assertIn("secondary_model_environment_variable: FOUNDRY_MODEL_NAME", metadata)
