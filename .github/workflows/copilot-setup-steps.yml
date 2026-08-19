@@ -29,16 +29,42 @@ jobs:
           echo "customer-owned preflight"
 
       - id: foundry-opt-checkout
-        name: Reserved bootstrap checkout slot
+        name: Fetch exact v1-capable shared revision
         shell: bash
         run: |
-          echo "future bootstrap will replace this managed step"
+          set -euo pipefail
+          repository="https://github.com/XOEEst/foundry-optimizer-coding-agent-plugin.git"
+          commit="17e3b3c41c6c1299837981d3cff4d6ef01fdccdc"
+          shared_root="$RUNNER_TEMP/foundry-opt-shared"
+          rm -rf "$shared_root"
+          git init "$shared_root"
+          git -C "$shared_root" remote add origin "$repository"
+          git -C "$shared_root" fetch --depth=1 origin "$commit"
+          git -C "$shared_root" checkout --detach FETCH_HEAD
+          resolved_commit="$(git -C "$shared_root" rev-parse HEAD)"
+          test "$resolved_commit" = "$commit"
+          echo "FOUNDRY_OPT_SHARED_ROOT=$shared_root" >>"$GITHUB_ENV"
+          echo "FOUNDRY_OPT_PACKAGE_ROOT=$shared_root" >>"$GITHUB_ENV"
+          echo "FOUNDRY_OPT_SKILL_SOURCE=$shared_root/src/foundry_opt/templates/skills/foundry-agent-optimizer" >>"$GITHUB_ENV"
 
       - id: foundry-opt-bootstrap
-        name: Reserved bootstrap tool slot
+        name: Install the exact shared CLI and skill
         shell: bash
         run: |
-          echo "future bootstrap will replace this managed step"
+          set -euo pipefail
+          uv sync --frozen --project "$FOUNDRY_OPT_PACKAGE_ROOT"
+          launcher_root="$HOME/.local/bin"
+          mkdir -p "$launcher_root"
+          export FOUNDRY_OPT_EXECUTABLE="$launcher_root/foundry-opt"
+          ln -sf "$FOUNDRY_OPT_PACKAGE_ROOT/.venv/bin/foundry-opt" "$FOUNDRY_OPT_EXECUTABLE"
+          chmod 755 "$FOUNDRY_OPT_EXECUTABLE"
+          echo "FOUNDRY_OPT_EXECUTABLE=$FOUNDRY_OPT_EXECUTABLE" >>"$GITHUB_ENV"
+          echo "$launcher_root" >>"$GITHUB_PATH"
+          echo "$FOUNDRY_OPT_PACKAGE_ROOT/.venv/bin" >>"$GITHUB_PATH"
+          skill_root="$HOME/.copilot/skills/foundry-agent-optimizer"
+          rm -rf "$skill_root"
+          mkdir -p "$(dirname "$skill_root")"
+          cp -a "$FOUNDRY_OPT_SKILL_SOURCE" "$skill_root"
 
       - id: customer-postflight
         name: Customer postflight marker
